@@ -1,0 +1,26 @@
+{
+    "files.associations": {
+        "emulator.C": "cpp",
+        "ratio": "cpp",
+        "__locale": "cpp",
+        "string": "cpp",
+        "filesystem": "cpp",
+        "iosfwd": "cpp",
+        "string_view": "cpp",
+        "__tree": "cpp",
+        "map": "cpp",
+        "iostream": "cpp",
+        "memory": "cpp",
+        "utility": "cpp",
+        "__hash_table": "cpp",
+        "__split_buffer": "cpp",
+        "array": "cpp",
+        "bitset": "cpp",
+        "deque": "cpp",
+        "initializer_list": "cpp",
+        "stack": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "iterator": "cpp"
+    }
+}
