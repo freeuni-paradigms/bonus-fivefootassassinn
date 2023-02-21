@@ -252,61 +252,121 @@ bool PrintfOperation(string line,int SP, int PC, map<string,int>& registers) {
 }
 
 bool Branch(string line, int SP, int& PC,int size, map<string,int>& registers) {
-    int firstComma = line.find(',');
-    int secondComma = line.rfind(',');
-    if (firstComma == string::npos || secondComma == string::npos) {
-        cout<<"Invalid branch instruction.\n";
-        return false;
-    }
-    cout<<"Current PC: "<<PC<<".\nThis line performs branch instructions.\n";
-    
-    int futurePC;
-    int delta = 0;
-
-    if (line[secondComma + 1] == 'P') {
-        delta = StringToInt(line.substr(secondComma + 4));
-        if (delta % 4 != 0) {
-            cout << "Program Counter increment must be a multiple of 4.\n" << endl;
-            return false;
-        }
-
-        futurePC = (line[secondComma + 3] == '+') ? PC + delta : PC - delta;
-        if ((futurePC < 0) || (futurePC / 4 >= size)) {
-            cout << "Invalid value to change Program Counter.\n" << endl;
-            return false;
-        }
-    } else {
-        futurePC = StringToInt(line.substr(secondComma + 1));
-        if (futurePC % 4 != 0) {
-            cout << "Program Counter should be a multiple of 4.\n" << endl;
-            return false;
-        }
-
-        if (futurePC / 4 >= size) {
-            cout << "Program Counter cannot be set to this value.\n" << endl;
-            return false;
+    int firstComma = -1;
+    int secondComma = -1;
+    cout << "Current PC - " << PC << ".\nThis line is for branch instructions. Please note that the operands in the test ";
+    cout << "of a branch statement must be in registers or constant values.\n";
+    for (int i = 3; i < line.size(); i++) {
+        if (line[i] == ',') {
+            if (firstComma == -1) {
+                firstComma = i;
+            } else {
+                secondComma = i;
+                break;
+            }
         }
     }
-
-    int firstOperand = Operand(line.substr(3, firstComma - 3), SP, PC, registers);
-    int secondOperand = Operand(line.substr(firstComma + 1, secondComma - firstComma - 1), SP, PC, registers);
-    string op = line.substr(1, 2);
-    bool conditionMet = false;
-    if (op == "LT") conditionMet = firstOperand < secondOperand;
-    else if (op == "LE") conditionMet = firstOperand <= secondOperand;
-    else if (op == "GT") conditionMet = firstOperand > secondOperand;
-    else if (op == "GE") conditionMet = firstOperand >= secondOperand;
-    else if (op == "EQ") conditionMet = firstOperand == secondOperand;
-    else if (op == "NE") conditionMet = firstOperand != secondOperand;
-
-    if (conditionMet) {
-        PC = futurePC;
-        cout << "Branch condition is true. Program Counter changed to " << PC << ".\n" << endl;
-    } else {
-        cout << "Branch condition is false.\n" << endl;
-        PC += 4;
+    if (firstComma != -1 && secondComma == -1) {
+        secondComma = line.size();
     }
-    return conditionMet;
+
+    int newPC;
+    if (line[secondComma+1]=='P') {
+        int delta=StringToInt(line.substr(secondComma+4));
+        if (delta % 4 != 0)  {
+            cout<<"The increment of Program Counter must be multiple of 4.\n"<<endl;
+            return false;
+        }
+        if (line[secondComma+3]=='+')   {
+            if ((PC+delta)/4>=size) {
+                cout<<"Can't change program counter by such a big value. Count lines of your code once again!\n"<<endl;
+                return false;
+            }
+            newPC=PC+delta;
+        }
+        if (line[secondComma+3]=='-') {
+            if (PC-delta+4<0) {
+                cout<<"Can't change program counter by such a big value. Count lines of your code once again!\n"<<endl;
+                return false;
+            }
+            newPC=PC-delta;
+        }
+    }
+    else {
+        newPC=StringToInt(line.substr(secondComma+1));
+        if (newPC % 4 != 0)  {
+            cout<<"The value of Program Counter must always be multiple of 4.\n"<<endl;
+            return false;
+        }
+        if (newPC/4>=size) {
+            cout<<"Program Counter can't be equal to such a big value. Count lines of your code once again!\n"<<endl;
+            return false;
+        }
+    }
+    int firstOperand=Operand(line.substr(3,firstComma-3),SP,PC,registers);
+    int secondOperand=Operand(line.substr(firstComma+1,secondComma-firstComma-1),SP,PC,registers);
+    string op=line.substr(1,2);
+    if (op == "LT") {
+        if (firstOperand<secondOperand) {
+            cout<<"Branch condition is true. Program Counter will be changed to "<<newPC<<".\n"<<endl;
+            PC=newPC;
+        }   else {
+            cout<<"Branch condition is false. Emulator will just continue executing instructions from the next line.\n"<<endl;
+            PC+=4;
+        }
+        return true;    
+    }
+    if (op == "LE") {
+        if (firstOperand<=secondOperand) {
+            cout<<"Branch condition is true. Program Counter will be changed to "<<newPC<<".\n"<<endl;
+            PC=newPC;
+        }   else {
+            cout<<"Branch condition is false. Emulator will just continue executing instructions from the next line.\n"<<endl;
+            PC+=4;
+        }
+        return true;    
+    }
+    if (op == "GT") {
+        if (firstOperand>secondOperand) {
+            cout<<"Branch condition is true. Program Counter will be changed to "<<newPC<<".\n"<<endl;
+            PC=newPC;
+        }   else {
+            cout<<"Branch condition is false. Emulator will just continue executing instructions from the next line.\n"<<endl;
+            PC+=4;
+        }
+        return true;    
+    }
+    if (op == "GE") {
+        if (firstOperand>=secondOperand) {
+            cout<<"Branch condition is true. Program Counter will be changed to "<<newPC<<".\n"<<endl;
+            PC=newPC;
+        }   else {
+            cout<<"Branch condition is false. Emulator will just continue executing instructions from the next line.\n"<<endl;
+            PC+=4;
+        }
+        return true;    
+    }
+    if (op == "EQ") {
+        if (firstOperand==secondOperand) {
+            cout<<"Branch condition is true. Program Counter will be changed to "<<newPC<<".\n"<<endl;
+            PC=newPC;
+        }   else {
+            cout<<"Branch condition is false. Emulator will just continue executing instructions from the next line.\n"<<endl;
+            PC+=4;
+        }
+        return true;    
+    }
+    if (op == "NE") {
+        if (firstOperand!=secondOperand) {
+            cout<<"Branch condition is true. Program Counter will be changed to "<<newPC<<".\n"<<endl;
+            PC+=PC;
+        }   else {
+            cout<<"Branch condition is false. Emulator will just continue executing instructions from the next line.\n"<<endl;
+            PC+=4;
+        }
+        return true;    
+    }
+    return false;
 }
 bool JumpInstruction(string line, int& PC, int size) {
     cout << "Current PC: " << PC << ". This line performs jump operation." << endl;
@@ -423,7 +483,7 @@ void Process(vector <string>& lines,map<string,int>& registers,map<string,pair<i
             }
         }
         if (line[0]=='B') {
-            if (CheckBranch(line,SP,PC,lines.size(),registers)) {
+            if (Branch(line,SP,PC,lines.size(),registers)) {
                 continue;
             }   else {
                 cout<<"Instruction on line "<<PC/4+1<<" could not be executed.\n"<<endl;
